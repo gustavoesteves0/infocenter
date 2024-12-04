@@ -5,6 +5,7 @@ def main():
     data_classes = {
         "GDP": "extraction_files.GDP",
         "CPI": "extraction_files.CPI",
+        "Fed_Funds_Rate": "extraction_files.Fed_Funds_Rate",
         "JOLTS": "extraction_files.JOLTS",
         "Payroll": "extraction_files.Payroll",
         "PCE": "extraction_files.PCE",
@@ -18,7 +19,7 @@ def main():
     # Directory paths for saving
     raw_pickle_dir = "./pkl/raw/"
     treated_pickle_dir = "./pkl/treated/"
-    excel_dir = "./excel_files/"
+    excel_dir = "../excel_files/"
     
     # Process each data class dynamically
     for class_name, module_path in data_classes.items():
