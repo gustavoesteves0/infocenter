@@ -1,6 +1,6 @@
 import importlib
 
-def main():
+def get_all_data():
     # Configuration: Mapping of class names to their file paths
     data_classes = {
         "GDP": "extraction_files.GDP",
@@ -46,4 +46,4 @@ def main():
             print(f"Error processing {class_name}: {e}")
 
 if __name__ == "__main__":
-    main()
+    get_all_data()
