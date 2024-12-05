@@ -9,13 +9,15 @@ const Home: React.FC = () => {
   return (
     <div className="bg-background text-text min-h-screen">
       <Navbar />
-      <div className="p-4">
-        <h1 className="text-3xl mb-4">Hello, User. <br />
-            What are we looking for today?</h1>
+      <div className="p-8">
+        <h1 className="text-5xl mb-4 ml-10">
+          Hello, <span className="text-green-500">User</span>. <br /> What are we looking for today?
+        </h1>
+        <div className="bg-white h-[1px] w-full mt-10"></div>
         <FavoritesSection />
         <EmploymentSection />
-        <PriceSection />
         <InterestSection />
+        <PriceSection />
       </div>
     </div>
   );
