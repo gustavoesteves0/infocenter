@@ -1,10 +1,9 @@
 import logging
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
-from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Column, Integer, String
+from data.dependencies import Base, SessionLocal, engine, get_db
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
@@ -12,12 +11,6 @@ from datetime import datetime, timedelta
 # Configure Logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
-# Database Configuration
-DATABASE_URL = "postgresql://postgres:@localhost/budget_bloomberg"
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
 
 # JWT Configuration
 SECRET_KEY = "KWDS23w2asd02"
@@ -28,6 +21,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+engine = engine
+SessionLocal = SessionLocal
+Base = Base
 
 # Models
 class User(Base):
@@ -98,14 +95,6 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     logger.info(f"Token created for data: {data}")
     return token
-
-# Dependency for DB session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 def register(user: UserCreate, db: SessionLocal = Depends(get_db)):
     logger.info(f"Registering user: {user.email}")

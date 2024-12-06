@@ -28,23 +28,23 @@ def process_data_class(class_name, module_path):
     Function to process a specific data class.
     """
     print(f"Processing data for {class_name}...")
-    
+
     try:
         # Dynamically import the module and get the class
         module = importlib.import_module(module_path)
         data_class = getattr(module, class_name)
-        
+
         # Initialize the data class
         data_instance = data_class(api_key)
-        
+
         # Define file paths for saving
         raw_pickle_path = f"{raw_pickle_dir}{class_name}_data.pkl"
         treated_pickle_path = f"{treated_pickle_dir}{class_name}_data.pkl"
         excel_path = f"{excel_dir}{class_name}_data.xlsx"
-        
-        # Run the data pipeline (fetch, process, save)
+
+        # Run the data pipeline (fetch, process, save to DB)
         data_instance.run(raw_pickle_path, treated_pickle_path, excel_path)
-        
+
         print(f"{class_name} data processing complete!\n")
         return {"status": "success", "message": f"{class_name} data processed successfully"}
     except Exception as e:

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from controllers.auth import UserCreate, Token, register, login_for_access_token, read_users_me
+from ..controllers.auth import UserCreate, Token, register, login_for_access_token, read_users_me
 
 router = APIRouter()
 

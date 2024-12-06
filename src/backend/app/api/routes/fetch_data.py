@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from controllers.fetch import fetch_data, fetch_all_data, root
+from ..controllers.fetch import fetch_data, fetch_all_data, root
 
 router = APIRouter()
 

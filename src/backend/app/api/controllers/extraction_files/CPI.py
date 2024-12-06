@@ -1,14 +1,17 @@
 import requests
 import pandas as pd
+import psycopg2
+from psycopg2.extras import execute_values
 
 class CPI:
-    def __init__(self, api_key):
+    def __init__(self, api_key, db_config):
         """
-        Initialize the CPI class with the API key and default parameters.
+        Initialize the CPI class with the API key and database configuration.
         """
         self.api_key = api_key
         self.endpoint = "https://api.stlouisfed.org/fred/series/observations"
         self.series_id = "CPIAUCSL"  # Consumer Price Index for All Urban Consumers
+        self.db_config = db_config  # Database connection details
 
     def fetch_data(self):
         """
@@ -51,9 +54,41 @@ class CPI:
         print(f"Raw data saved to {pickle_path_raw}")
         print(f"Processed data saved to {pickle_path_treated} and {excel_path}")
 
+    def load_to_db(self, df):
+        """
+        Load the processed CPI data into the PostgreSQL database.
+        """
+        # Database connection
+        conn = psycopg2.connect(**self.db_config)
+        cursor = conn.cursor()
+        
+        # Insert data into the cpi_data table
+        insert_query = """
+        INSERT INTO cpi_data (Date, Value, "MoM (%)", "YoY (%)")
+        VALUES %s
+        ON CONFLICT (Date) DO UPDATE SET
+            Value = EXCLUDED.Value,
+            "MoM (%)" = EXCLUDED."MoM (%)",
+            "YoY (%)" = EXCLUDED."YoY (%)";
+        """
+        
+        # Prepare data for insertion
+        records = df[["Data", "Valor", "MoM (%)", "YoY (%)"]].to_records(index=False)
+        data_to_insert = [(row[0], row[1], row[2], row[3]) for row in records]
+        
+        # Execute the query
+        execute_values(cursor, insert_query, data_to_insert)
+        conn.commit()
+        
+        print(f"Inserted/Updated {len(data_to_insert)} rows into the cpi_data table.")
+        
+        # Close the connection
+        cursor.close()
+        conn.close()
+
     def run(self, pickle_path_raw, pickle_path_treated, excel_path):
         """
-        Execute the full pipeline: fetch, process, and save CPI data.
+        Execute the full pipeline: fetch, process, save, and load CPI data to the database.
         """
         # Fetch raw data
         raw_df = self.fetch_data()
@@ -61,8 +96,8 @@ class CPI:
         # Process data
         processed_df = self.process_data(raw_df)
         
-        # Save data
-        self.save_data(raw_df, processed_df, pickle_path_raw, pickle_path_treated, excel_path)
+        # Load data into the database
+        self.load_to_db(processed_df)
 
         # Return processed data for further use if needed
         return processed_df
